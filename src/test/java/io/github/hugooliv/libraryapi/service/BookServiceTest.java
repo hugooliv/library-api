@@ -1,6 +1,5 @@
 package io.github.hugooliv.libraryapi.service;
 
-import io.github.hugooliv.libraryapi.api.dto.BookDTO;
 import io.github.hugooliv.libraryapi.exception.BusinessException;
 import io.github.hugooliv.libraryapi.model.entity.Book;
 import io.github.hugooliv.libraryapi.model.repository.BookRepository;
@@ -14,6 +13,8 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -61,6 +62,49 @@ public class BookServiceTest {
 
         Mockito.verify(repository, Mockito.never()).save(book);
 
+    }
+
+    @Test
+    @DisplayName("Deve deletar um livro por ID")
+    public void deleteByIdTest(){
+        Long id = 1L;
+        Book book = createValidBook();
+        book.setId(id);
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(book));
+
+        Optional<Book> foundBook = service.getById(id);
+
+        //service.delete();
+
+        assertThat(foundBook.isPresent()).isFalse();
+    }
+
+    @Test
+    @DisplayName("Deve obter um livro por ID")
+    public void getByIdTest(){
+        Long id = 1L;
+        Book book = createValidBook();
+        book.setId(id);
+        Mockito.when(repository.findById(id)).thenReturn(Optional.of(book));
+
+        Optional<Book> foundBook = service.getById(id);
+
+        assertThat(foundBook.isPresent()).isTrue();
+        assertThat(foundBook.get().getId()).isEqualTo(id);
+        assertThat(foundBook.get().getAuthor()).isEqualTo(book.getAuthor());
+        assertThat(foundBook.get().getTitle()).isEqualTo(book.getTitle());
+        assertThat(foundBook.get().getIsbn()).isEqualTo(book.getIsbn());
+    }
+
+    @Test
+    @DisplayName("Deve retornar vazio ao obter um livro por ID inexistente")
+    public void bookNotFoundByIdTest(){
+        Long id = 1L;
+        Mockito.when(repository.findById(id)).thenReturn(Optional.empty());
+
+        Optional<Book> book = service.getById(id);
+
+        assertThat(book.isPresent()).isFalse();
     }
 
     public Book createValidBook(){
